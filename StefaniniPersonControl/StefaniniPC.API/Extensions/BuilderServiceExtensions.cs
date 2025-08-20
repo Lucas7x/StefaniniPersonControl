@@ -15,5 +15,11 @@ namespace StefaniniPC.API.Extensions
 
             return services;
         }
+
+        public static IServiceCollection ConfigureAutomapper(this IServiceCollection services)
+        {
+            services.AddAutoMapper(x => x.AddMaps(typeof(Program).Assembly));
+            return services;
+        }
     }
 }
