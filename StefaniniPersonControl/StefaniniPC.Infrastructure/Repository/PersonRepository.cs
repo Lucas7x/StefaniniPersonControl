@@ -19,7 +19,7 @@ namespace StefaniniPC.Infrastructure.Repository
         {
             return await _dbContext.Persons
                                    .AsNoTracking()
-                                   .Where(p => p.DeletedAt != null)
+                                   .Where(p => p.DeletedAt == null)
                                    .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         }
 
@@ -28,9 +28,11 @@ namespace StefaniniPC.Infrastructure.Repository
             throw new NotImplementedException();
         }
 
-        public Task CreatePersonAsync(Person person, CancellationToken cancellationToken = default)
+        public async Task CreatePersonAsync(Person person, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            await _dbContext.Persons
+                            .AddAsync(person, cancellationToken);
+            await _dbContext.SaveChangesAsync();
         }
 
         public Task UpdatePersonAsync(Person person, CancellationToken cancellationToken = default)
@@ -41,6 +43,14 @@ namespace StefaniniPC.Infrastructure.Repository
         public Task DeletePersonAsync(Person person, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<Person?> GetPersonByCpfAsync(string cpf, CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Persons
+                                   .AsNoTracking()
+                                   .Where(p => p.DeletedAt == null)
+                                   .FirstOrDefaultAsync(p => p.Cpf == cpf, cancellationToken);
         }
     }
 }

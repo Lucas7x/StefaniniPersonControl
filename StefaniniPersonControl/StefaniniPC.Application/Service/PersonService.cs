@@ -30,7 +30,13 @@ namespace StefaniniPC.API.Services
 
         public async Task CreatePersonAsync(PersonDTO dto, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            Person? person = await _repository.GetPersonByCpfAsync(dto.Cpf, cancellationToken);
+
+            if (person != null)
+                throw new Exception("O CPF informado já está sendo usado.");
+
+            person = _mapper.Map<Person>(dto);
+            await _repository.CreatePersonAsync(person, cancellationToken);
         }
         
         public Task UpdatePersonAsync(PersonDTO dto, CancellationToken cancellationToken = default)

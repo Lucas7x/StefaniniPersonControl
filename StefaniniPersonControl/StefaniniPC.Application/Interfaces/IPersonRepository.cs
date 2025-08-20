@@ -10,5 +10,6 @@ namespace StefaniniPC.Application.Interfaces
         Task CreatePersonAsync(Person person, CancellationToken cancellationToken = default);
         Task UpdatePersonAsync(Person person, CancellationToken cancellationToken = default);
         Task DeletePersonAsync(Person person, CancellationToken cancellationToken = default);
+        Task<Person?> GetPersonByCpfAsync(string cpf, CancellationToken cancellationToken = default);
     }
 }

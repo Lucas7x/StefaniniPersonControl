@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using StefaniniPC.Application.DTOs;
 using StefaniniPC.Application.Interfaces;
 
 namespace StefaniniPC.API.Controllers
@@ -14,7 +15,7 @@ namespace StefaniniPC.API.Controllers
             _service = service;
         }
 
-        [HttpGet]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetById([FromRoute] long id, CancellationToken cancellationToken)
         {
             try
@@ -32,6 +33,22 @@ namespace StefaniniPC.API.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] PersonDTO dto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
 
+                await _service.CreatePersonAsync(dto);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }
