@@ -13,7 +13,6 @@
   <ItemGroup>
     <Folder Include="API\Controllers\" />
     <Folder Include="Application\" />
-    <Folder Include="Domain\" />
     <Folder Include="Infrastructure\" />
     <Folder Include="API\" />
   </ItemGroup>
