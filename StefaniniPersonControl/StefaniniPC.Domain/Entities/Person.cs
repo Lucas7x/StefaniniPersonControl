@@ -1,4 +1,4 @@
-﻿namespace StefaniniPC.Domain.Entities;
+﻿namespace StefaniniPC.Domain.Entities
 {
     public class Person : BaseEntity
     {
