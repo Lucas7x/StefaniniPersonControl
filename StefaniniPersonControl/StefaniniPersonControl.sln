@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StefaniniPC.Application", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StefaniniPC.Infrastructure", "StefaniniPC.Infrastructure\StefaniniPC.Infrastructure.csproj", "{86AE91D2-5B31-4014-80F9-C3B761502A48}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StefaniniPC.API", "StefaniniPC.API\StefaniniPC.API.csproj", "{0B26FC98-18B7-4DAC-9367-7CDABFADB4FE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{86AE91D2-5B31-4014-80F9-C3B761502A48}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{86AE91D2-5B31-4014-80F9-C3B761502A48}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{86AE91D2-5B31-4014-80F9-C3B761502A48}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B26FC98-18B7-4DAC-9367-7CDABFADB4FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B26FC98-18B7-4DAC-9367-7CDABFADB4FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B26FC98-18B7-4DAC-9367-7CDABFADB4FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B26FC98-18B7-4DAC-9367-7CDABFADB4FE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
