@@ -1,4 +1,5 @@
-﻿using StefaniniPC.Application.Filters;
+﻿using Microsoft.EntityFrameworkCore;
+using StefaniniPC.Application.Filters;
 using StefaniniPC.Application.Interfaces;
 using StefaniniPC.Domain.Entities;
 using StefaniniPC.Infrastructure.Database;
@@ -14,9 +15,12 @@ namespace StefaniniPC.Infrastructure.Repository
             _dbContext = dbContext;
         }
 
-        public Task<Person?> GetPersonByIdAsync(long id, CancellationToken cancellationToken = default)
+        public async Task<Person?> GetPersonByIdAsync(long id, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            return await _dbContext.Persons
+                                   .AsNoTracking()
+                                   .Where(p => p.DeletedAt != null)
+                                   .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         }
 
         public Task<List<Person>> ListPersonAsync(PersonQueryFilter filter, CancellationToken cancellationToken = default)

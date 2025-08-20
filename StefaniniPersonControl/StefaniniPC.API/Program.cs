@@ -15,8 +15,11 @@ builder.Services.AddSwaggerGen();
 // DataContext
 builder.Services.ConfigureDatabaseContext(builder.Configuration);
 
-// Registering Repositories
+builder.Services.ConfigureAutomapper();
+
+// Registering Repositories and Services
 builder.Services.AddScoped<IPersonRepository, PersonRepository>();
+builder.Services.AddScoped<IPersonService, PersonService>();
 
 var app = builder.Build();
 
