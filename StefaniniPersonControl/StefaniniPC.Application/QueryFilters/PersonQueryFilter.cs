@@ -1,0 +1,15 @@
+﻿using StefaniniPC.Application.QueryFilters;
+
+namespace StefaniniPC.Application.Filters
+{
+    public class PersonQueryFilter : QueryFilterBase
+    {
+        public string? Name { get; set; }
+        public string? Gender { get; set; }
+        public string? Email { get; set; }
+        public DateTime? BirthDate { get; set; } = DateTime.MinValue;
+        public string? Nationality { get; set; }
+        public string? PlaceOfBirth { get; set; }
+        public string? Cpf { get; set; } = string.Empty;
+    }
+}
