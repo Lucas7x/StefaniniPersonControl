@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using StefaniniPC.Application.DTOs;
+using StefaniniPC.Application.Filters;
 using StefaniniPC.Application.Interfaces;
+using StefaniniPC.Domain.Entities;
 
 namespace StefaniniPC.API.Controllers
 {
@@ -74,6 +76,20 @@ namespace StefaniniPC.API.Controllers
                 await _service.DeletePersonAsync(id, cancellationToken);
 
                 return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> List([FromQuery] PersonQueryFilter filter, CancellationToken cancellationToken)
+        {
+            try
+            {
+                List<PersonDTO> persons = await _service.ListPersonAsync(filter, cancellationToken);
+                return Ok(persons);
             }
             catch (Exception ex)
             {

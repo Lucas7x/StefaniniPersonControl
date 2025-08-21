@@ -7,9 +7,9 @@ namespace StefaniniPC.Application.Filters
         public string? Name { get; set; }
         public string? Gender { get; set; }
         public string? Email { get; set; }
-        public DateTime? BirthDate { get; set; } = DateTime.MinValue;
+        public DateTime? BirthDate { get; set; }
         public string? Nationality { get; set; }
         public string? PlaceOfBirth { get; set; }
-        public string? Cpf { get; set; } = string.Empty;
+        public string? Cpf { get; set; }
     }
 }

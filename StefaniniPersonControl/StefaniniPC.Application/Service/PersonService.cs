@@ -23,9 +23,10 @@ namespace StefaniniPC.API.Services
             return _mapper.Map<PersonDTO?>(person);
         }
 
-        public Task<List<PersonDTO>> ListPersonAsync(PersonQueryFilter filter, CancellationToken cancellationToken = default)
+        public async Task<List<PersonDTO>> ListPersonAsync(PersonQueryFilter filter, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            List<Person> persons = await _repository.ListPersonAsync(filter, cancellationToken);
+            return persons.Select(_mapper.Map<PersonDTO>).ToList();
         }
 
         public async Task CreatePersonAsync(PersonDTO dto, CancellationToken cancellationToken = default)
