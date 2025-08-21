@@ -45,9 +45,13 @@ namespace StefaniniPC.Infrastructure.Repository
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        public Task DeletePersonAsync(long id, CancellationToken cancellationToken = default)
+        public async Task DeletePersonAsync(Person person, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            person.DeletedAt = DateTime.Now;
+            _dbContext.Persons
+                      .Update(person);
+
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
         public async Task<Person?> GetPersonByCpfAsync(string cpf, CancellationToken cancellationToken = default)

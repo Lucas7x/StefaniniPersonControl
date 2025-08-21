@@ -67,14 +67,17 @@ namespace StefaniniPC.API.Services
             if (dto.Cpf != null)
                 person.Cpf = dto.Cpf;
 
-
-
             await _repository.UpdatePersonAsync(person, cancellationToken);
         }
 
-        public Task DeletePersonAsync(PersonDTO dto, CancellationToken cancellationToken = default)
+        public async Task DeletePersonAsync(long id, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            Person? person = await _repository.GetPersonByIdAsync(id, cancellationToken);
+
+            if (person == null)
+                throw new Exception("O ID informado não é válido.");
+
+            await _repository.DeletePersonAsync(person, cancellationToken);
         }
     }
 }

@@ -65,5 +65,20 @@ namespace StefaniniPC.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete([FromRoute] long id, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _service.DeletePersonAsync(id, cancellationToken);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

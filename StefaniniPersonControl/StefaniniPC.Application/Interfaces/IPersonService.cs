@@ -9,6 +9,6 @@ namespace StefaniniPC.Application.Interfaces
         Task<List<PersonDTO>> ListPersonAsync(PersonQueryFilter filter, CancellationToken cancellationToken = default);
         Task CreatePersonAsync(PersonDTO dto, CancellationToken cancellationToken = default);
         Task UpdatePersonAsync(long id, UpdatePersonDTO dto, CancellationToken cancellationToken = default);
-        Task DeletePersonAsync(PersonDTO dto, CancellationToken cancellationToken = default);
+        Task DeletePersonAsync(long id, CancellationToken cancellationToken = default);
     }
 }
