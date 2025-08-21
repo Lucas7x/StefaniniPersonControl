@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using StefaniniPC.Application.DTOs;
 using StefaniniPC.Application.Filters;
 using StefaniniPC.Application.Interfaces;
@@ -10,11 +11,15 @@ namespace StefaniniPC.API.Services
     {
         private readonly IPersonRepository _repository;
         private readonly IMapper _mapper;
+        private readonly ITokenService _tokenService;
+        private readonly IPasswordHasher<Person> _passwordHasher;
 
-        public PersonService(IPersonRepository repository, IMapper mapper)
+        public PersonService(IPersonRepository repository, IMapper mapper, ITokenService tokenService, IPasswordHasher<Person> passwordHasher)
         {
             _repository = repository;
             _mapper = mapper;
+            _tokenService = tokenService;
+            _passwordHasher = passwordHasher;
         }
 
         public async Task<PersonDTO?> GetPersonByIdAsync(long id, CancellationToken cancellationToken = default)
@@ -29,7 +34,7 @@ namespace StefaniniPC.API.Services
             return persons.Select(_mapper.Map<PersonDTO>).ToList();
         }
 
-        public async Task CreatePersonAsync(PersonDTO dto, CancellationToken cancellationToken = default)
+        public async Task CreatePersonAsync(CreatePersonDTO dto, CancellationToken cancellationToken = default)
         {
             Person? person = await _repository.GetPersonByCpfAsync(dto.Cpf, cancellationToken);
 
@@ -37,9 +42,12 @@ namespace StefaniniPC.API.Services
                 throw new Exception("O CPF informado já está sendo usado.");
 
             person = _mapper.Map<Person>(dto);
+
+            person.Password = _passwordHasher.HashPassword(person, dto.Password);
+
             await _repository.CreatePersonAsync(person, cancellationToken);
         }
-        
+
         public async Task UpdatePersonAsync(long id, UpdatePersonDTO dto, CancellationToken cancellationToken = default)
         {
             Person? person = await _repository.GetPersonByIdAsync(id, cancellationToken);
@@ -79,6 +87,26 @@ namespace StefaniniPC.API.Services
                 throw new Exception("O ID informado não é válido.");
 
             await _repository.DeletePersonAsync(person, cancellationToken);
+        }
+
+        public async Task<AuthenticationToken?> LoginAsync(LoginDTO dto, CancellationToken cancellationToken = default)
+        {
+            Person? person = await _repository.GetPersonByCpfAsync(dto.Cpf, cancellationToken);
+
+            if (person is null)
+                return null;
+
+            PasswordVerificationResult result = _passwordHasher.VerifyHashedPassword(person, person.Password, dto.Password);
+
+            switch (result)
+            {
+                case PasswordVerificationResult.Success:
+                case PasswordVerificationResult.SuccessRehashNeeded:
+                    return _tokenService.GenerateToken(person);
+                case PasswordVerificationResult.Failed:
+                default:
+                    return null;
+            }
         }
     }
 }

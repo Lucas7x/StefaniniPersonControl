@@ -1,8 +1,10 @@
 ﻿using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using StefaniniPC.API.Middlewares;
+using StefaniniPC.Application.Interfaces;
 using StefaniniPC.Infrastructure.Autentication;
 
 namespace StefaniniPC.API.Extensions
@@ -29,6 +31,9 @@ namespace StefaniniPC.API.Extensions
                 ValidAudience = configuration["Jwt:Audience"],
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:IssuerSigningKey"]!))
             });
+
+            services.AddSingleton(typeof(IPasswordHasher<>), typeof(PasswordHasher<>));
+            services.AddSingleton<ITokenService, TokenService>();
 
             return services;
         }

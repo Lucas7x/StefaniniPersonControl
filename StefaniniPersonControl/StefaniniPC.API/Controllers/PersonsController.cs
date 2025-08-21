@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Threading;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StefaniniPC.Application.DTOs;
 using StefaniniPC.Application.Filters;
@@ -38,7 +39,8 @@ namespace StefaniniPC.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] PersonDTO dto, CancellationToken cancellationToken)
+        [AllowAnonymous]
+        public async Task<IActionResult> Create([FromBody] CreatePersonDTO dto, CancellationToken cancellationToken)
         {
             try
             {
@@ -92,6 +94,27 @@ namespace StefaniniPC.API.Controllers
             {
                 List<PersonDTO> persons = await _service.ListPersonAsync(filter, cancellationToken);
                 return Ok(persons);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("login")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Login([FromBody] LoginDTO login, CancellationToken cancellationToken)
+        {
+            try
+            {
+                AuthenticationToken? token = await _service.LoginAsync(login, cancellationToken);
+
+                if (token is null)
+                {
+                    return Unauthorized();
+                }
+
+                return Ok(token);
             }
             catch (Exception ex)
             {

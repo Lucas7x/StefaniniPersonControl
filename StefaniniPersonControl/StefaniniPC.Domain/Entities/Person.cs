@@ -9,5 +9,6 @@
         public string? Nationality { get; set; }
         public string? PlaceOfBirth { get; set; }
         public string Cpf { get; set; } = string.Empty;
+        public string Password {  get; set; }
     }
 }
