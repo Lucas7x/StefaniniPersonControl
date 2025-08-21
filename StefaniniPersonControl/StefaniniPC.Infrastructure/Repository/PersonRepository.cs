@@ -3,7 +3,6 @@ using StefaniniPC.Application.Filters;
 using StefaniniPC.Application.Interfaces;
 using StefaniniPC.Domain.Entities;
 using StefaniniPC.Infrastructure.Database;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace StefaniniPC.Infrastructure.Repository
 {

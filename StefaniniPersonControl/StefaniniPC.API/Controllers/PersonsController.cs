@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using StefaniniPC.Application.DTOs;
 using StefaniniPC.Application.Filters;
 using StefaniniPC.Application.Interfaces;
@@ -8,6 +9,7 @@ namespace StefaniniPC.API.Controllers
 {
     [Controller]
     [Route("api/v1/[controller]")]
+    [Authorize]
     public class PersonsController : Controller
     {
         private readonly IPersonService _service;

@@ -18,6 +18,7 @@ builder.Services.ConfigureDatabaseContext(builder.Configuration);
 
 builder.Services.ConfigureAutomapper();
 
+builder.Services.AddJwtAutentication(builder.Configuration);
 // Registering Repositories and Services
 builder.Services.AddScoped<IPersonRepository, PersonRepository>();
 builder.Services.AddScoped<IPersonService, PersonService>();
