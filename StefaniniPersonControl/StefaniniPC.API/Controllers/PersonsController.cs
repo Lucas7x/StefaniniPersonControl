@@ -34,14 +34,29 @@ namespace StefaniniPC.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] PersonDTO dto)
+        public async Task<IActionResult> Create([FromBody] PersonDTO dto, CancellationToken cancellationToken)
         {
             try
             {
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
-                await _service.CreatePersonAsync(dto);
+                await _service.CreatePersonAsync(dto, cancellationToken);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> Put([FromBody] UpdatePersonDTO dto, [FromRoute] long id, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _service.UpdatePersonAsync(id, dto, cancellationToken);
 
                 return Ok();
             }

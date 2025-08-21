@@ -39,9 +39,37 @@ namespace StefaniniPC.API.Services
             await _repository.CreatePersonAsync(person, cancellationToken);
         }
         
-        public Task UpdatePersonAsync(PersonDTO dto, CancellationToken cancellationToken = default)
+        public async Task UpdatePersonAsync(long id, UpdatePersonDTO dto, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            Person? person = await _repository.GetPersonByIdAsync(id, cancellationToken);
+
+            if (person == null)
+                throw new Exception("O ID informado não é válido.");
+
+            if (dto.Name != null)
+                person.Name = dto.Name;
+
+            if (dto.Gender != null)
+                person.Gender = dto.Gender;
+
+            if (dto.Email != null)
+                person.Email = dto.Email;
+
+            if (dto.BirthDate != null)
+                person.BirthDate = dto.BirthDate.Value;
+
+            if (dto.Nationality != null)
+                person.Nationality = dto.Nationality;
+
+            if (dto.PlaceOfBirth != null)
+                person.PlaceOfBirth = dto.PlaceOfBirth;
+
+            if (dto.Cpf != null)
+                person.Cpf = dto.Cpf;
+
+
+
+            await _repository.UpdatePersonAsync(person, cancellationToken);
         }
 
         public Task DeletePersonAsync(PersonDTO dto, CancellationToken cancellationToken = default)
