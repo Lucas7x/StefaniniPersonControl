@@ -26,6 +26,13 @@ builder.Services.AddScoped<IPersonService, PersonService>();
 var app = builder.Build();
 
 
+app.UseCors(corsBuilder => corsBuilder
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .SetIsOriginAllowed(_ => true)
+                .AllowCredentials()
+                );
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
