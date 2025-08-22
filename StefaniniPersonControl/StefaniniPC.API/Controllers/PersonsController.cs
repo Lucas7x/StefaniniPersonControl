@@ -93,7 +93,7 @@ namespace StefaniniPC.API.Controllers
         {
             try
             {
-                List<PersonDTO> persons = await _service.ListPersonAsync(filter, cancellationToken);
+                List<GetPersonResponseDTO> persons = await _service.ListPersonAsync(filter, cancellationToken);
                 return Ok(persons);
             }
             catch (Exception ex)

@@ -9,6 +9,7 @@ namespace StefaniniPC.API.Mapping
         public PersonProfile() 
         { 
             CreateMap<Person, PersonDTO>().ReverseMap();
+            CreateMap<Person, GetPersonResponseDTO>().ReverseMap();
         }
     }
 }

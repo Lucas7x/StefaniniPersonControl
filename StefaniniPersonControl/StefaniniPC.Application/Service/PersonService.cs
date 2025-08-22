@@ -22,16 +22,16 @@ namespace StefaniniPC.API.Services
             _passwordHasher = passwordHasher;
         }
 
-        public async Task<PersonDTO?> GetPersonByIdAsync(long id, CancellationToken cancellationToken = default)
+        public async Task<GetPersonResponseDTO?> GetPersonByIdAsync(long id, CancellationToken cancellationToken = default)
         {
             Person? person = await _repository.GetPersonByIdAsync(id, cancellationToken);
-            return _mapper.Map<PersonDTO?>(person);
+            return _mapper.Map<GetPersonResponseDTO?>(person);
         }
 
-        public async Task<List<PersonDTO>> ListPersonAsync(PersonQueryFilter filter, CancellationToken cancellationToken = default)
+        public async Task<List<GetPersonResponseDTO>> ListPersonAsync(PersonQueryFilter filter, CancellationToken cancellationToken = default)
         {
             List<Person> persons = await _repository.ListPersonAsync(filter, cancellationToken);
-            return persons.Select(_mapper.Map<PersonDTO>).ToList();
+            return persons.Select(_mapper.Map<GetPersonResponseDTO>).ToList();
         }
 
         public async Task CreatePersonAsync(CreatePersonDTO dto, CancellationToken cancellationToken = default)
