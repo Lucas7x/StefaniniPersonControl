@@ -36,6 +36,7 @@ namespace StefaniniPC.API.Services
 
         public async Task CreatePersonAsync(CreatePersonDTO dto, CancellationToken cancellationToken = default)
         {
+            dto.Cpf = dto.Cpf.Replace(".", "").Replace("-", "").Trim();
             Person? person = await _repository.GetPersonByCpfAsync(dto.Cpf, cancellationToken);
 
             if (person != null)
@@ -74,7 +75,15 @@ namespace StefaniniPC.API.Services
                 person.PlaceOfBirth = dto.PlaceOfBirth;
 
             if (dto.Cpf != null)
-                person.Cpf = dto.Cpf;
+            {
+                dto.Cpf = dto.Cpf.Replace(".", "").Replace("-", "").Trim();
+                Person? otherPerson = await _repository.GetPersonByCpfAsync(dto.Cpf, cancellationToken);
+
+                if (otherPerson != null && otherPerson.Id != person.Id)
+                    throw new Exception("O CPF informado já está sendo usado.");
+
+                person.Cpf = dto.Cpf.Replace(".", "").Replace("-", "").Trim();
+            }
 
             await _repository.UpdatePersonAsync(person, cancellationToken);
         }

@@ -1,10 +1,8 @@
-﻿using System.Threading;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StefaniniPC.Application.DTOs;
 using StefaniniPC.Application.Filters;
 using StefaniniPC.Application.Interfaces;
-using StefaniniPC.Domain.Entities;
 
 namespace StefaniniPC.API.Controllers
 {
@@ -62,6 +60,9 @@ namespace StefaniniPC.API.Controllers
         {
             try
             {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
                 await _service.UpdatePersonAsync(id, dto, cancellationToken);
 
                 return Ok();
