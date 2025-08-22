@@ -10,7 +10,7 @@ namespace StefaniniPC.API.Extensions
             string? defaultConnection = configuration.GetConnectionString("DefaultConnection");
 
             services.AddDbContext<ApplicationDbContext>(
-                options => options.UseSqlite(defaultConnection)
+                options => options.UseSqlServer(defaultConnection)
             );
 
             return services;
