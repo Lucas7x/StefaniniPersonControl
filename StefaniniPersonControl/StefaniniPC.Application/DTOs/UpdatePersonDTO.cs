@@ -11,7 +11,7 @@ namespace StefaniniPC.Application.DTOs
         [EmailAddress(ErrorMessage = "E-mail inválido.")]
         public string? Email { get; set; }
 
-        [BirthDateValidation(18, ErrorMessage = "A Data de Nascimento deve ser maior que 01/01/1900, não pode ser no futuro e é necessário ter pelo menos 18 anos.")]
+        [BirthDateValidation(18, SkipValidationIfNull = true, ErrorMessage = "A Data de Nascimento deve ser maior que 01/01/1900, não pode ser no futuro e é necessário ter pelo menos 18 anos.")]
         public DateTime? BirthDate { get; set; }
         public string? Nationality { get; set; }
         public string? PlaceOfBirth { get; set; }
