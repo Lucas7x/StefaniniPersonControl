@@ -19,6 +19,7 @@ const People = () => {
   const [editingPerson, setEditingPerson] = useState<Person | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string[] }>({});
 
   useEffect(() => {
     loadPeople();
@@ -75,26 +76,36 @@ const People = () => {
 
   const handleEditSave = async (updatedPerson: Person) => {
     try {
-      await peopleApi.update(updatedPerson.id, {
-        name: updatedPerson.name,
-        email: updatedPerson.email,
-        birthDate: updatedPerson.birthDate,
-        placeOfBirth: updatedPerson.placeOfBirth,
-        nationality: updatedPerson.nationality,
-        gender: updatedPerson.gender
-      });
+      await peopleApi.update(
+        updatedPerson.id, 
+        {
+          name: (updatedPerson.name != "") ? updatedPerson.name : undefined,
+          email: (updatedPerson.email != "") ? updatedPerson.email : undefined,
+          birthDate: (updatedPerson.birthDate != "") ? updatedPerson.birthDate : undefined,
+          placeOfBirth: (updatedPerson.placeOfBirth != "") ? updatedPerson.placeOfBirth : undefined,
+          nationality: (updatedPerson.nationality != "") ? updatedPerson.nationality : undefined,
+          gender: (updatedPerson.gender != "") ? updatedPerson.gender : undefined
+        }
+      );
 
       setPeople(people.map(p => p.id === updatedPerson.id ? { ...p, ...updatedPerson } : p));
       setEditingPerson(null);
       toast({
         title: "Pessoa atualizada com sucesso!",
       });
+
+      setFieldErrors({});
     } catch (err: any) {
       toast({
         title: "Erro ao atualizar pessoa",
-        description: err.message || 'Erro desconhecido',
+        description: "Verifique os campos destacados.",
         variant: "destructive"
       });
+
+      if (err.response?.data) {
+        setFieldErrors(err.response.data);
+      }
+      throw err;
     }
   };
 
@@ -246,6 +257,7 @@ const People = () => {
           person={editingPerson}
           onSave={handleEditSave}
           onClose={() => setEditingPerson(null)}
+          fieldErrors={fieldErrors}
         />
       )}
     </div>

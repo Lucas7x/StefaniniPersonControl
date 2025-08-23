@@ -16,18 +16,18 @@ interface RegisterRequest {
     name: string;
     cpf: string;
     password: string;
-    gender: string;
-    email: string;
+    gender?: string;
+    email?: string;
     birthDate: string;
-    placeOfBirth: string;
-    nationality: string;
+    placeOfBirth?: string;
+    nationality?: string;
 }
 
 export interface Person {
     id: string;
     cpf: string;
     name: string;
-    gender: string;
+    gender?: string;
     email?: string;
     birthDate: string;
     placeOfBirth?: string;
@@ -40,7 +40,7 @@ interface UpdatePersonRequest {
     birthDate: string;
     placeOfBirth?: string;
     nationality?: string;
-    gender: string;
+    gender?: string;
 }
 
 export interface LoginResponse {
@@ -93,7 +93,7 @@ async function apiRequest<T>(
         console.error('API request error:', error);
         // Handle API errors with interceptor
         if (error.status) {
-            handleApiError(error, false); // Don't show toast here, let components handle it
+            handleApiError(error, false); // Don't show toast here, let components handle it                    
             throw error;
         }
 
@@ -115,7 +115,7 @@ export const authApi = {
         });
     },
 
-    async register(userData: RegisterRequest): Promise<{ token: string; user: any }> {
+    async register(userData: RegisterRequest): Promise<void> {
         return apiRequest('/persons', {
             method: 'POST',
             body: JSON.stringify(userData),

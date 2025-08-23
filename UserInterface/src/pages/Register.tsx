@@ -8,78 +8,47 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { authApi } from '@/services/api';
+import { Controller, useForm } from 'react-hook-form';
 
 const Register = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    cpf: '',
-    password: '',
-    confirmPassword: '',
-    gender: '',
-    email: '',
-    birthDate: '',
-    placeOfBirth: '',
-    nationality: ''
-  });
+
+  const { formState, control, setValue, watch, handleSubmit, getValues, setError: setError2 } = useForm({
+    defaultValues: {
+      name: '',
+      cpf: '',
+      email: '',
+      birthDate: '',
+      placeOfBirth: '',
+      nationality: '',
+      gender: 'masculino',
+      password: '',
+      confirmPassword: ''
+    },
+    mode: 'onBlur'
+  })
+
+
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const formatCpf = (value: string) => {
-    const cleanValue = value.replace(/\D/g, '');
-    return cleanValue
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d{1,2})/, '$1-$2')
-      .replace(/(-\d{2})\d+?$/, '$1');
-  };
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: field === 'cpf' ? formatCpf(value) : value
-    }));
-  };
-
-  const validateForm = () => {
-    if (!formData.name || !formData.cpf || !formData.password || !formData.gender || !formData.birthDate) {
-      return 'Todos os campos obrigatórios devem ser preenchidos';
-    }
-
-    if (formData.password.length < 4) {
-      return 'A senha deve ter no mínimo 4 caracteres';
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      return 'A confirmação de senha não confere';
-    }
-
-    return '';
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const save = async (person: any) => {
     setError('');
-
-    const validationError = validateForm();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
 
     setLoading(true);
 
     try {
       const response = await authApi.register({
-        name: formData.name,
-        cpf: formData.cpf,
-        password: formData.password,
-        gender: formData.gender,
-        email: formData.email,
-        birthDate: formData.birthDate,
-        placeOfBirth: formData.placeOfBirth,
-        nationality: formData.nationality
+        name: (person.name != "") ? person.name : undefined,
+        email: (person.email != "") ? person.email : undefined,
+        birthDate: (person.birthDate != "") ? person.birthDate : undefined,
+        placeOfBirth: (person.placeOfBirth != "") ? person.placeOfBirth : undefined,
+        nationality: (person.nationality != "") ? person.nationality : undefined,
+        gender: (person.gender != "") ? person.gender : undefined,
+        cpf: (person.cpf != "") ? person.cpf : undefined,
+        password: (person.password != "") ? person.password : undefined,
       });
 
       toast({
@@ -89,7 +58,22 @@ const Register = () => {
 
       navigate('/login');
     } catch (err: any) {
-      setError(err.message || 'Erro ao realizar cadastro');
+      if (err.status === 400) {
+        const data = err.data;
+        if (data.message) {
+          setError(data.message)
+        }
+        else {
+          Object.keys(data).forEach(key => {
+            const k = key.charAt(0).toLowerCase() + key.slice(1) as 'cpf' | 'name' | 'password' | 'gender' | 'birthDate' | 'placeOfBirth' | 'email' | 'nationality';
+            console.log(k, data[key][0])
+            setError2(k, {
+              message: data[key][0]
+            })
+          });
+
+        }
+      }
     } finally {
       setLoading(false);
     }
@@ -105,7 +89,7 @@ const Register = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit(save)} className="space-y-4">
             {error && (
               <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
@@ -115,109 +99,199 @@ const Register = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Nome completo *</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="Digite seu nome completo"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
-                  required
-                />
+                <Controller
+                  name='name'
+                  control={control}
+                  rules={{
+                    required: 'O nome não pode ser vazio',
+                  }}
+                  render={({ field }) => <Input
+                    className={formState.errors.name?.message && 'border-red-500'}
+                    {...field}
+                    id="name"
+                    type="text"
+                    required
+                    placeholder='Ex.: José da Silva'
+                  />} />
+                <p className='text-red-500 text-xs'>{formState.errors?.name?.message}</p>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="cpf">CPF *</Label>
-                <Input
-                  id="cpf"
-                  type="text"
-                  placeholder="000.000.000-00"
-                  value={formData.cpf}
-                  onChange={(e) => handleInputChange('cpf', e.target.value)}
-                  maxLength={14}
-                  required
-                />
+                <Controller
+                  name='cpf'
+                  control={control}
+                  rules={{
+                    required: "O CPF não pode ser vazio",
+                    validate: {
+                      onlyNumber: (value) =>
+                        /^\d+$/.test(value) || "Somente números são permitidos.",
+                      length: (value) =>
+                        value.length !== 11 ? "O CPF deve ter exatamente 11 dígitos." : null,
+                    },
+                  }}
+
+                  render={({ field }) => <Input
+                    className={formState.errors.cpf?.message && 'border-red-500'}
+                    {...field}
+                    id="cpf"
+                    type="text"
+                    required
+                    placeholder="00000000000"
+                    maxLength={11}
+                  />} />
+                <p className='text-red-500 text-xs'>{formState.errors?.cpf?.message}</p>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="password">Senha *</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Mínimo 4 caracteres"
-                  value={formData.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
-                  required
-                />
+                <Controller
+                  name='password'
+                  control={control}
+                  rules={{
+                    required: "A senha não pode ser vazia.",
+                    validate: {
+                      length: (value) =>
+                        value.length < 4 ? "A senha deve ter no mínimo 4 caracteres." : null,
+                    },
+                  }}
+                  render={({ field }) => <Input
+                    className={formState.errors.password?.message && 'border-red-500'}
+                    {...field}
+                    id="password"
+                    type="password"
+                    required
+                    placeholder="Mínimo 4 caracteres"
+                  />} />
+                <p className='text-red-500 text-xs'>{formState.errors?.password?.message}</p>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirmar senha *</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="Confirme sua senha"
-                  value={formData.confirmPassword}
-                  onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                  required
-                />
+                <Controller
+                  name='confirmPassword'
+                  control={control}
+                  rules={{
+                    required: "A confirmação de senha não pode ser vazia.",
+                    validate: {
+                      passwordsEquals: (value) => value !== getValues('password') ? 'As senhas não coincidem' : null
+                    },
+                  }}
+                  render={({ field }) => <Input
+                    className={formState.errors.confirmPassword?.message && 'border-red-500'}
+                    {...field}
+                    id="confirmPassword"
+                    type="password"
+                    required
+                    placeholder="Confirme sua senha"
+                  />} />
+                <p className='text-red-500 text-xs'>{formState.errors?.confirmPassword?.message}</p>
               </div>
 
               <div className="space-y-2">
                 <Label>Gênero *</Label>
-                <Select onValueChange={(value) => handleInputChange('gender', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione seu gênero" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="masculino">Masculino</SelectItem>
-                    <SelectItem value="feminino">Feminino</SelectItem>
-                    <SelectItem value="prefiro não informar">Prefiro não informar</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Controller
+                  name='gender'
+                  control={control}
+                  render={({ field }) =>
+                    <Select
+                      {...field}
+                      onValueChange={(e) => field.onChange(e)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="masculino">Masculino</SelectItem>
+                        <SelectItem value="feminino">Feminino</SelectItem>
+                        <SelectItem value="prefiro não informar">Prefiro não informar</SelectItem>
+                      </SelectContent>
+                    </Select>} />
+                <p className='text-red-500 text-xs'>{formState.errors?.gender?.message}</p>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="birthDate">Data de nascimento *</Label>
-                <Input
-                  id="birthDate"
-                  type="date"
-                  value={formData.birthDate}
-                  onChange={(e) => handleInputChange('birthDate', e.target.value)}
-                  required
-                />
+                <Controller
+                  name='birthDate'
+                  control={control}
+                  rules={{
+                    required: 'A data de nascimento é obrigatória',
+                    validate: {
+                      validRange: (dateStr) => {
+                        if (!dateStr) return "Data inválida";
+
+                        const date = new Date(dateStr);
+
+                        if (isNaN(date.getTime())) {
+                          return "Formato de data inválido";
+                        }
+
+                        const minDate = new Date("1900-01-01");
+                        const today = new Date();
+                        const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+
+                        if (date < minDate || date > maxDate) {
+                          return `A data deve estar entre ${minDate.toISOString().split("T")[0]} e ${maxDate.toISOString().split("T")[0]}`;
+                        }
+
+                        return null; // válido
+                      }
+                    }
+                  }}
+                  render={({ field }) => <Input
+                    className={formState.errors.birthDate?.message && 'border-red-500'}
+                    {...field}
+                    id="birthDate"
+                    type="date"
+                    required
+                  />} />
+                <p className='text-red-500 text-xs'>{formState.errors?.birthDate?.message}</p>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="seu@email.com"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                />
+                <Controller
+                  name='email'
+                  control={control}
+                  render={({ field }) => <Input
+                    className={formState.errors.email?.message && 'border-red-500'}
+                    {...field}
+                    id="email"
+                    type="email"
+                    placeholder="seu@email.com"
+                  />} />
+                <p className='text-red-500 text-xs'>{formState.errors?.email?.message}</p>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="placeOfBirth">Lugar de nascimento</Label>
-                <Input
-                  id="placeOfBirth"
-                  type="text"
-                  placeholder="Cidade onde nasceu"
-                  value={formData.placeOfBirth}
-                  onChange={(e) => handleInputChange('placeOfBirth', e.target.value)}
-                />
+                <Controller
+                  name='placeOfBirth'
+                  control={control}
+                  render={({ field }) => <Input
+                    className={formState.errors.placeOfBirth?.message && 'border-red-500'}
+                    {...field}
+                    id="placeOfBirth"
+                    type="text"
+                    placeholder="Cidade onde nasceu"
+                  />} />
+                <p className='text-red-500 text-xs'>{formState.errors?.placeOfBirth?.message}</p>
               </div>
 
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="nationality">Nacionalidade</Label>
-                <Input
-                  id="nationality"
-                  type="text"
-                  placeholder="Ex: Brasileiro"
-                  value={formData.nationality}
-                  onChange={(e) => handleInputChange('nationality', e.target.value)}
-                />
+                <Controller
+                  name='nationality'
+                  control={control}
+                  render={({ field }) => <Input
+                    className={formState.errors.nationality?.message && 'border-red-500'}
+                    {...field}
+                    id="nationality"
+                    type="text"
+                    placeholder="Ex: Brasileiro"
+                  />} />
+                <p className='text-red-500 text-xs'>{formState.errors?.nationality?.message}</p>
               </div>
             </div>
 

@@ -6,78 +6,58 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type Person } from '@/services/api';
+import { Controller, useForm } from 'react-hook-form';
+import { cn } from '@/lib/utils';
 
 interface PersonEditModalProps {
   person: Person;
-  onSave: (updatedPerson: Person) => void;
+  onSave: (updatedPerson: Person) => Promise<void>;
   onClose: () => void;
+  fieldErrors: { [key: string]: string[] };
 }
 
 export const PersonEditModal = ({ person, onSave, onClose }: PersonEditModalProps) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    birthDate: '',
-    placeOfBirth: '',
-    nationality: '',
-    gender: ''
-  });
-  const [error, setError] = useState('');
+
+  const { formState, control, setValue, handleSubmit } = useForm({
+    defaultValues: {
+      name: '',
+      cpf: '',
+      email: '',
+      birthDate: '',
+      placeOfBirth: '',
+      nationality: '',
+      gender: ''
+    },
+    mode: 'onBlur'
+  })
+
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (person) {
-      setFormData({
-        name: person.name,
-        email: person.email || '',
-        birthDate: person.birthDate.split('T')[0], // Convert to date input format
-        placeOfBirth: person.placeOfBirth || '',
-        nationality: person.nationality || '',
-        gender: person.gender
-      });
+      setValue('name', person.name ?? '');
+      setValue('cpf', person.cpf ?? '');
+      setValue('gender', person.gender ?? '');
+      setValue('birthDate', person.birthDate.split('T')[0] ?? '');
+      setValue('email', person.email ?? '');
+      setValue('placeOfBirth', person.placeOfBirth ?? '');
+      setValue('nationality', person.nationality ?? '');
     }
   }, [person]);
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const validateForm = () => {
-    if (!formData.name || !formData.birthDate) {
-      return 'Nome e data de nascimento são obrigatórios';
-    }
-    return '';
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    const validationError = validateForm();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
+  const save = async (p: any) => {
 
     setLoading(true);
 
     try {
       const updatedPerson: Person = {
         ...person,
-        name: formData.name,
-        email: formData.email,
-        birthDate: formData.birthDate + 'T00:00:00Z', // Convert back to API format
-        placeOfBirth: formData.placeOfBirth,
-        nationality: formData.nationality,
-        gender: formData.gender
+        ...p
       };
 
-      onSave(updatedPerson);
+      await onSave(updatedPerson);
     } catch (err: any) {
-      setError(err.message || 'Erro ao atualizar pessoa');
+
     } finally {
       setLoading(false);
     }
@@ -92,6 +72,12 @@ export const PersonEditModal = ({ person, onSave, onClose }: PersonEditModalProp
     }
   };
 
+  useEffect(() => {
+
+  }, []);
+
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
+
   return (
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -102,95 +88,146 @@ export const PersonEditModal = ({ person, onSave, onClose }: PersonEditModalProp
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
+        <form onSubmit={handleSubmit(save)} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="edit-name">Nome completo *</Label>
-              <Input
-                id="edit-name"
-                type="text"
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                required
-              />
+              <Controller
+                name='name'
+                control={control}
+                rules={{
+                  required: 'O nome não pode ser vazio',
+                }}
+                render={({ field }) => <Input
+                  className={formState.errors.name?.message && 'border-red-500'}
+                  {...field}
+                  id="edit-name"
+                  type="text"
+                  required
+                />} />
+              <p className='text-red-500 text-xs'>{formState.errors?.name?.message}</p>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="edit-cpf">CPF (não editável)</Label>
-              <Input
-                id="edit-cpf"
-                type="text"
-                value={person.cpf}
-                disabled
-                className="bg-muted"
-              />
+              <Controller
+                name='cpf'
+                control={control}
+                render={({ field }) => <Input
+                  className={cn('bg-muted', formState.errors.cpf?.message && 'border-red-500')}
+                  {...field}
+                  id="edit-cpf"
+                  type="text"
+                  required
+                  disabled
+                />} />
+              <p className='text-red-500 text-xs'>{formState.errors?.cpf?.message}</p>
             </div>
 
             <div className="space-y-2">
               <Label>Gênero *</Label>
-              <Select
-                value={formData.gender}
-                onValueChange={(value) => handleInputChange('gender', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="masculino">Masculino</SelectItem>
-                  <SelectItem value="feminino">Feminino</SelectItem>
-                  <SelectItem value="prefiro não informar">Prefiro não informar</SelectItem>
-                </SelectContent>
-              </Select>
+              <Controller
+                name='gender'
+                control={control}
+                render={({ field }) =>
+                  <Select
+                    {...field}
+                    onValueChange={(e) => field.onChange(e)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="masculino">Masculino</SelectItem>
+                      <SelectItem value="feminino">Feminino</SelectItem>
+                      <SelectItem value="prefiro não informar">Prefiro não informar</SelectItem>
+                    </SelectContent>
+                  </Select>} />
+              <p className='text-red-500 text-xs'>{formState.errors?.gender?.message}</p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="edit-birthDate">Data de nascimento *</Label>
-              <Input
-                id="edit-birthDate"
-                type="date"
-                value={formData.birthDate}
-                onChange={(e) => handleInputChange('birthDate', e.target.value)}
-                required
-              />
+              <Label htmlFor="edit-birthDate">Data de nascimento</Label>
+              <Controller
+                name='birthDate'
+                control={control}
+                rules={{
+                  required: 'A data de nascimento é obrigatória',
+                  validate: {
+                    validRange: (dateStr) => {
+                      if (!dateStr) return "Data inválida";
+
+                      const date = new Date(dateStr);
+
+                      if (isNaN(date.getTime())) {
+                        return "Formato de data inválido";
+                      }
+
+                      const minDate = new Date("1900-01-01");
+                      const today = new Date();
+                      const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+
+                      if (date < minDate || date > maxDate) {
+                        return `A data deve estar entre ${minDate.toISOString().split("T")[0]} e ${maxDate.toISOString().split("T")[0]}`;
+                      }
+
+                      return null; // válido
+                    }
+                  }
+                }}
+                render={({ field }) => <Input
+                  className={formState.errors.birthDate?.message && 'border-red-500'}
+                  {...field}
+                  id="edit-birthDate"
+                  type="date"
+                  required
+                />} />
+              <p className='text-red-500 text-xs'>{formState.errors?.birthDate?.message}</p>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="edit-email">Email</Label>
-              <Input
-                id="edit-email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                placeholder="seu@email.com"
-              />
+              <Controller
+                name='email'
+                control={control}
+                render={({ field }) => <Input
+                  className={formState.errors.email?.message && 'border-red-500'}
+                  {...field}
+                  id="edit-email"
+                  type="email"
+                  placeholder="seu@email.com"
+                />} />
+              <p className='text-red-500 text-xs'>{formState.errors?.email?.message}</p>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="edit-placeOfBirth">Lugar de nascimento</Label>
-              <Input
-                id="edit-placeOfBirth"
-                type="text"
-                value={formData.placeOfBirth}
-                onChange={(e) => handleInputChange('placeOfBirth', e.target.value)}
-                placeholder="Cidade onde nasceu"
-              />
+              <Controller
+                name='placeOfBirth'
+                control={control}
+                render={({ field }) => <Input
+                  className={formState.errors.placeOfBirth?.message && 'border-red-500'}
+                  {...field}
+                  id="edit-placeOfBirth"
+                  type="text"
+                  placeholder="Cidade onde nasceu"
+                />} />
+              <p className='text-red-500 text-xs'>{formState.errors?.placeOfBirth?.message}</p>
             </div>
 
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="edit-nationality">Nacionalidade</Label>
-              <Input
-                id="edit-nationality"
-                type="text"
-                value={formData.nationality}
-                onChange={(e) => handleInputChange('nationality', e.target.value)}
-                placeholder="Ex: Brasileiro"
-              />
+              <Controller
+                name='nationality'
+                control={control}
+                render={({ field }) => <Input
+                  className={formState.errors.nationality?.message && 'border-red-500'}
+                  {...field}
+                  id="edit-nationality"
+                  type="text"
+                  placeholder="Ex: Brasileiro"
+                />} />
+              <p className='text-red-500 text-xs'>{formState.errors?.nationality?.message}</p>
             </div>
           </div>
 
@@ -201,7 +238,7 @@ export const PersonEditModal = ({ person, onSave, onClose }: PersonEditModalProp
               disabled={loading}
             >
               {loading ? 'Salvando...' : 'Salvar Alterações'}
-            </Button>
+            </Button>       
 
             <Button
               type="button"
