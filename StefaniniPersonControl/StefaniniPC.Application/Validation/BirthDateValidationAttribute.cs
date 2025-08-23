@@ -13,10 +13,17 @@ namespace StefaniniPC.Application.Validation
             MinimumAge = minimumAge;
         }
 
+        public bool SkipValidationIfNull { get; set; } = false;
+
         protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
             if (value == null)
+            {
+                if (SkipValidationIfNull)
+                    return ValidationResult.Success!;
+
                 return new ValidationResult("A Data de Nascimento é obrigatória.");
+            }
 
             if (value is not DateTime birthDate)
                 return new ValidationResult("Data de Nascimento inválida.");
