@@ -31,7 +31,7 @@ app.UseCors(corsBuilder => corsBuilder
                 .AllowAnyHeader()
                 .SetIsOriginAllowed(_ => true)
                 .AllowCredentials()
-                );
+            );
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
